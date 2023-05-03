@@ -1,0 +1,151 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use App\Models\Style;
+use bushart\productmanagement\CrudHelpers;
+use App\Requests\StyleRequest;
+
+class StyleController extends Controller
+{
+    private $data = [];
+    private $success = false;
+    private $message = '';
+
+    /**
+     * Display a listing of the resource.
+     * @return Renderable
+     */
+    public function index()
+    {
+        $this->data['headers'] = $this->headers();
+
+        return view('admin.style.index', $this->data);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     * @return Renderable
+     */
+    public function create()
+    {
+        return view('admin.style.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     * @param StyleRequest $request
+     * @return Renderable
+     */
+    public function store(StyleRequest $request)
+    {
+
+        $data = $request->all();
+        if (!empty($data)) {
+            unset($data['token']);
+            $data['image'] = CrudHelpers::uploadImage($request, 'image', 'images/style');
+            Style::create($data);
+            $this->success = true;
+            $this->message = 'Style created successfully';
+        }
+
+        return response()->json(['success' => $this->success, 'message' => $this->message]);
+    }
+
+    /**
+     * Show the specified resource.
+     * @param int $id
+     * @return Renderable
+     */
+    public function show($id)
+    {
+        return view('admin.style.show');
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     * @param int $id
+     * @return Renderable
+     */
+    public function edit($id)
+    {
+       $data = Style::find($id);
+
+        return view('admin.style.edit', compact('data'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     * @param StyleRequest $request
+     * @return Renderable
+     */
+    public function update(StyleRequest $request)
+    {
+        $data = $request->all();
+        $product = Style::find($data['id']);
+        if ($request->hasFile('image')) {
+            $data['image'] = CrudHelpers::uploadImage($request, 'image', 'images/style', $product->image);
+        }
+        $product->update($data);
+        $this->success = true;
+        $this->message = 'Style updated successfully';
+
+        return response()->json(['success' => $this->success, 'message' => $this->message]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     * @param int $id
+     * @return Renderable
+     */
+    public function destroy($id)
+    {
+        $obj = Style::find($id);
+        if ($obj) {
+            $obj->delete();
+            $this->success = true;
+            $this->message = 'Style deleted successfully';
+        }
+
+        return response()->json(['success' => $this->success, 'message' => $this->message]);
+    }
+
+    /**
+     * this is use to function show style data
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getData(Request $request)
+    {
+        $this->data = [];
+        $this->params = [
+            'perPage' => 25,
+            'page' => $request->input('page'),
+            'search' => $request->input('search'),
+            'sortColumn' => $request->input('sortColumn'),
+            'sortType' => $request->input('sortType'),
+            'dropDownFilters' => $request->input('dropDownFilters'),
+        ];
+        $this->data = Style::getData($this->params);
+
+        return response()->json($this->data);
+    }
+
+    /**
+     * this is use to function create table header name
+     *
+     * @return array
+     */
+    protected function headers()
+    {
+        $array = [
+            ['name'], ['image'], ['description'], ['actions']
+        ];
+
+        return CrudHelpers::generateHeaders($array);
+    }
+}

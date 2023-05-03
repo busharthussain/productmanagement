@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Session;
+use bushart\productmanagement\CrudHelpers;
+use bushart\productmanagement\Grid;
+
+class ProductSubCategory extends Model
+{
+    use HasFactory;
+
+    protected $guarded = ['id'];
+
+    /**
+     * This is use to function get product category data
+     *
+     * @param $params
+     * @return array
+     */
+    protected static function getData($params)
+    {
+        $path = asset('images/sub-category');
+        $sql = DB::table('product_sub_categories as psc')
+            ->select('psc.*', 'pc.name as category_name', 'pc.unique_id as category_unique_id','pt.name as product_type_name', DB::raw("CONCAT('$path','/',psc.image) as image"))
+            ->join('product_categories as pc', 'pc.id', '=', 'psc.category_id')
+            ->join('product_types as pt', 'pt.id', '=', 'psc.product_type_id');
+        if (!empty($params['sortColumn']) && !empty($params['sortType'])) {
+            $sql->orderBy($params['sortColumn'], $params['sortType']);
+        }
+        if (!empty($params['search'])) {
+            $search = '%' . $params['search'] . '%';
+            $sql->where('psc.name', 'like', $search);
+        }
+        $sql->orderBy('psc.created_at', 'desc');
+        $grid = [];
+        $grid['query'] = $sql;
+        $grid['perPage'] = $params['perPage'];
+        $grid['page'] = $params['page'];
+        $grid['gridFields'] = self::gridFields();
+
+        return Grid::runSql($grid);
+    }
+
+    /**
+     * this is use to function make grid file
+     *
+     * @return array
+     */
+    protected static function gridFields()
+    {
+        $fields = [
+         ['product_type_name'],['category_name'], ['name'], ['image']
+        ];
+        $arrFields = CrudHelpers::generateGridHeaders($fields);
+
+        return $arrFields;
+    }
+    /**
+     * This is used to get data from sub categories
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function subCategories()
+    {
+        return $this->hasMany(ProductListing::class, 'sub_category_id', 'id');
+    }
+}

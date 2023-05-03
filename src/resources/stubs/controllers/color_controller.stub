@@ -1,0 +1,158 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use App\Models\Color;
+use bushart\productmanagement\CrudHelpers;
+use App\Requests\ColorRequest;
+
+class ColorController extends Controller
+{
+    private $data, $params = [];
+    private $success = false;
+    private $message = '';
+
+    /**
+     * Display a listing of the resource.
+     * @return Renderable
+     */
+    public function index()
+    {
+        $this->data['headers'] = $this->headers();
+
+        return view('admin.color.index', $this->data);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     * @return Renderable
+     */
+    public function create()
+    {
+        return view('admin.color.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param ColorRequest $request
+     * @return Renderable
+     */
+    public function store(ColorRequest $request)
+    {
+        $data = $request->all();
+        if (!empty($data)) {
+            $data['image'] = CrudHelpers::uploadImage($request, 'image', 'images/color');
+            unset($data['token']);
+            Color::create($data);
+            $this->success = true;
+            $this->message = 'Color created successfully';
+        }
+
+        return response()->json(['success' => $this->success, 'message' => $this->message]);
+    }
+
+    /**
+     * Show the specified resource.
+     *
+     * @param int $id
+     * @return Renderable
+     */
+    public function show($id)
+    {
+
+
+        return view('admin.color.show');
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param int $id
+     * @return Renderable
+     */
+    public function edit($id)
+    {
+        $data = Color::find($id);
+        return view('admin.color.edit', compact('data'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param ColorRequest $request
+     * @return Renderable
+     */
+    public function update(ColorRequest $request)
+    {
+        $data = $request->all();
+        $color = Color::find($data['id']);
+        if (!empty($color)) {
+            if ($request->hasFile('image')) {
+                $data['image'] = CrudHelpers::uploadImage($request, 'image', 'images/color', $color->image);
+            }
+            $color->update($data);
+            $this->success = true;
+            $this->message = 'Color updated successfully';
+        }
+
+        return response()->json(['success' => $this->success, 'message' => $this->message]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param int $id
+     * @return Renderable
+     */
+    public function destroy($id)
+    {
+        $obj = Color::find($id);
+        if ($obj) {
+            $obj->delete();
+            $this->success = true;
+            $this->message = 'Color deleted successfully';
+        }
+
+        return response()->json(['success' => $this->success, 'message' => $this->message]);
+    }
+
+    /**
+     * this is use to function show color data
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getData(Request $request)
+    {
+        $this->data = [];
+        $this->params = [
+            'perPage' => 5,
+            'page' => $request->input('page'),
+            'search' => $request->input('search'),
+            'sortColumn' => $request->input('sortColumn'),
+            'sortType' => $request->input('sortType'),
+            'dropDownFilters' => $request->input('dropDownFilters'),
+        ];
+        $this->data = Color::getData($this->params);
+
+        return response()->json($this->data);
+    }
+
+    /**
+     * this is use to function create table header name
+     *
+     * @return array
+     */
+    protected function headers()
+    {
+        $array = [
+            ['name'], ['image'], ['actions']
+        ];
+
+        return CrudHelpers::generateHeaders($array);
+    }
+}

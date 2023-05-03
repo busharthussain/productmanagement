@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use bushart\productmanagement\CrudHelpers;
+use bushart\productmanagement\Grid;
+
+class Style extends Model
+{
+    use HasFactory;
+
+    protected $guarded = ['id'];
+
+    /**
+     * this is use to function get Style data
+     * @param $params
+     * @return array
+     */
+    protected static function getData($params)
+    {
+        $path = asset('images/style');
+        $sql = DB::table('styles as s');
+        $sql->select('s.*', DB::raw("CONCAT('$path','/',s.image) as image"));
+        if (!empty($params['sortColumn']) && !empty($params['sortType'])) {
+            $sql->orderBy($params['sortColumn'], $params['sortType']);
+        }
+        if (!empty($params['search'])) {
+            $search = '%' . $params['search'] . '%';
+            $sql->where('s.name', 'like', $search);
+        }
+        $sql->orderBy('s.created_at', 'desc');
+        $grid = [];
+        $grid['query'] = $sql;
+        $grid['perPage'] = $params['perPage'];
+        $grid['page'] = $params['page'];
+        $grid['gridFields'] = self::gridFields();
+
+        return Grid::runSql($grid);
+    }
+
+    /**
+     * this is use to function make grid file
+     *
+     * @return array
+     */
+    protected static function gridFields()
+    {
+        $fields = [
+            ['name'], ['image'], ['description']
+        ];
+        $arrFields = CrudHelpers::generateGridHeaders($fields);
+
+        return $arrFields;
+    }
+}

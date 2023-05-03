@@ -1,0 +1,26 @@
+{
+    "name": "bushart/productmanagement",
+    "description": "A simple modified Point of sale package",
+    "type": "library",
+    "license": "mit",
+    "autoload": {
+        "psr-4": {
+            "bushart\\productmanagement\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "busharthussain",
+            "email": "busharthussain@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "bushart\\productmanagement\\ProductManagementServiceProvider"
+            ]
+        }
+    }
+}

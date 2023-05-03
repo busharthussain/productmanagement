@@ -1,0 +1,69 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use bushart\productmanagement\CrudHelpers;
+use bushart\productmanagement\Grid;
+
+class ProductType extends Model
+{
+    use HasFactory;
+
+    protected $guarded = ['id'];
+
+    /**
+     * This is use to function get product type data
+     *
+     * @param $params
+     * @return array
+     */
+    protected static function getData($params)
+    {
+        $path = asset('images/product-type');
+        $sql = DB::table('product_types as pt')
+            ->select('pt.*', DB::raw("CONCAT('$path','/',pt.image) as image"));
+        if (!empty($params['sortColumn']) && !empty($params['sortType'])) {
+            $sql->orderBy($params['sortColumn'], $params['sortType']);
+        }
+        if (!empty($params['search'])) {
+            $search = '%' . $params['search'] . '%';
+            $sql->where('pt.name', 'like', $search);
+        }
+        $sql->orderBy('pt.created_at', 'desc');
+        $grid = [];
+        $grid['query'] = $sql;
+        $grid['perPage'] = $params['perPage'];
+        $grid['page'] = $params['page'];
+        $grid['gridFields'] = self::gridFields();
+
+        return Grid::runSql($grid);
+    }
+
+    /**
+     * this is use to function make grid file
+     *
+     * @return array
+     */
+    protected static function gridFields()
+    {
+        $fields = [
+            ['name']
+        ];
+        $arrFields = CrudHelpers::generateGridHeaders($fields);
+
+        return $arrFields;
+    }
+
+    /**
+     * This is used to get data from sub categories
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function category()
+    {
+        return $this->hasMany(ProductCategory::class, 'product_type_id', 'id');
+    }
+}

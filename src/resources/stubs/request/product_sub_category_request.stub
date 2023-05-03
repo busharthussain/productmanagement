@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class ProductSubCategoryRequest extends FormRequest
+{
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'name' => 'required',
+            'category_id' => 'required',
+            'product_type_id' => 'required',
+            'image' => 'required',
+        ];
+    }
+
+    /**
+     * this is use to function product sub category table  backend validation show message
+     *
+     */
+    public function messages()
+    {
+        return [
+            'name.required' => 'Please enter the product sub category name',
+            'category_id.required' => 'Please select the product category',
+            'product_type_id.required' => 'Please select the product Type',
+            'image.required' => 'Please select the product sub category image',
+        ];
+    }
+
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        $record = [];
+        parse_str($this->data, $record);
+        $this->request->add($record);
+
+        return true;
+    }
+}

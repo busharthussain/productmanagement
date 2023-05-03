@@ -1,0 +1,448 @@
+@extends('admin.layout.index')
+@section('title','Create')
+@section('content')
+    <style>
+        .preview-images-zone {
+            width: 100%;
+            border: 1px solid #ddd;
+            min-height: 180px;
+            /* display: flex; */
+            padding: 5px 5px 0px 5px;
+            position: relative;
+            overflow: auto;
+        }
+
+        .preview-images-zone > .preview-image:first-child {
+            height: 185px;
+            width: 185px;
+            position: relative;
+            margin-right: 5px;
+        }
+
+        .preview-images-zone > .preview-image {
+            height: 90px;
+            width: 90px;
+            position: relative;
+            margin-right: 5px;
+            float: left;
+            margin-bottom: 5px;
+        }
+
+        .preview-images-zone > .preview-image > .image-zone {
+            width: 100%;
+            height: 100%;
+        }
+
+        .preview-images-zone > .preview-image > .image-zone > img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .preview-images-zone > .preview-image > .tools-edit-image {
+            position: absolute;
+            z-index: 100;
+            color: #fff;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .preview-images-zone > .preview-image > .image-cancel {
+            font-size: 18px;
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-weight: bold;
+            margin-right: 10px;
+            cursor: pointer;
+            display: none;
+            z-index: 100;
+        }
+
+        .preview-image:hover > .image-zone {
+            cursor: move;
+            opacity: .5;
+        }
+
+        .preview-image:hover > .tools-edit-image,
+        .preview-image:hover > .image-cancel {
+            display: block;
+        }
+
+        .ui-sortable-helper {
+            width: 90px !important;
+            height: 90px !important;
+        }
+    </style>
+    <div class="row">
+        <div class="col-md-12 grid-margin">
+            <div class="page-header">
+                <div class="page-title">
+                    <h4>Product Add</h4>
+                    <h6>Create your Product</h6>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <form class="forms-sample" id="submit-form" enctype="multipart/form-data">
+                        @csrf
+                        <div class="row ">
+                            <div class="col-sm-4 col">
+                                <label class="form-label">Product Name</label>
+                                <input name="name" id="name" placeholder="name ..."
+                                       class="form-control required-listing-values" onkeyup="removeValidation(this.id)">
+                                <div class="invalid-feedback" id="invalid-name"></div>
+                            </div>
+                            <div class="col-lg-4 col-sm-4 col-12">
+                                <div class="form-group" data-select2-id="23">
+                                    <label>Product Type</label>
+                                    <select class="form-control required-listing-values product_type_id"
+                                            name="product_type_id"
+                                            onchange="removeValidation(this.id)"
+                                            id="product_type_id">
+                                        <option value="">Choose Product Type</option>
+                                        @foreach($productType as $key =>$row)
+                                            <option value="{{$row['id']}}">{{ucfirst($row['name'])}}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="invalid-feedback" id="invalid-product_type_id"></div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label">Product Category</label>
+                                <select class="form-control required-listing-values category_id"
+                                        name="category_id" id="category_id"
+                                        onchange="removeValidation(this.id)">
+                                    <option value="">Select Product Category</option>
+                                </select>
+                                <div class="invalid-feedback" id="invalid-category_id"></div>
+                            </div>
+
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label">Product Sub Category</label>
+                            <select class="form-control required-listing-values "
+                                    name="sub_category_id" id="sub_category_id"
+                                    onchange="removeValidation(this.id)">
+                                <option value="">Select Sub Category</option>
+                            </select>
+                            <div class="invalid-feedback" id="invalid-sub_category_id"></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label">Brand</label>
+                                <select name="brand_id" id="brand_id"
+                                        class="form-control required-listing-values"
+                                        onchange="removeValidation(this.id)">
+                                    <option value="">Select brand</option>
+                                    @foreach($brand as $key => $row)
+                                        <option value="{{$row['id']}}">{{ucfirst($row['name'])}}</option>
+                                    @endforeach
+                                </select>
+                                <div class="invalid-feedback" id="invalid-brand_id"></div>
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label">Material</label>
+                                <select name="material[]" id="material" multiple
+                                        class="form-control required-listing-values material"
+                                        onchange="removeValidation(this.id)">
+                                    @foreach($material as $key => $row)
+                                        <option value="{{$row['id']}}">{{ucfirst($row['name'])}}</option>
+                                    @endforeach
+                                </select>
+                                <div class="invalid-feedback" id="invalid-material"></div>
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label">Style</label>
+                                <select name="style_id" id="style_id"
+                                        class="form-control required-listing-values"
+                                        onchange="removeValidation(this.id)">
+                                    <option value="">Select style</option>
+                                    @foreach($style as $key => $row)
+                                        <option value="{{$row['id']}}">{{ucfirst($row['name'])}}</option>
+                                    @endforeach
+                                </select>
+                                <div class="invalid-feedback" id="invalid-style_id"></div>
+                            </div>
+                        </div>
+                        <div class="row ">
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label">Color</label>
+                                <select name="color[]" id="color"
+                                        class="form-control required-listing-values" multiple
+                                        onchange="removeValidation(this.id)">
+                                    @foreach($color as $key => $row)
+                                        <option value="{{$row['id']}}">{{ucfirst($row['name'])}}</option>
+                                    @endforeach
+                                </select>
+                                <div class="invalid-feedback" id="invalid-color"></div>
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label">Quantity</label>
+                                <input type="number" name="quantity" id="quantity"
+                                       class="form-control required-listing-values"
+                                       placeholder="quantity ..." onkeyup="removeValidation(this.id)">
+                                <div class="invalid-feedback" id="invalid-quantity"></div>
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label">Price</label>
+                                <div class="input-group mb-3">
+                                    <input type="number" name="price" id="price"
+                                           class="form-control required-listing-values" placeholder="price ..."
+                                           onkeyup="removeValidation(this.id)">
+                                </div>
+                                <div class="invalid-feedback" id="invalid-price"></div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label">Discount</label>
+                                <input type="number" name="discount" id="discount"
+                                       class="form-control required-listing-values" placeholder="discount ..."
+                                       onkeyup="removeValidation(this.id)">
+                                <div class="invalid-feedback" id="invalid-discount"></div>
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label">Height</label>
+                                <input name="height" id="height" class="form-control required-listing-values"
+                                       placeholder="price height ..." onkeyup="removeValidation(this.id)">
+                                <div class="invalid-feedback" id="invalid-height"></div>
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label">Width</label>
+                                <input name="width" id="width" class="form-control required-listing-values"
+                                       placeholder="width ..." onkeyup="removeValidation(this.id)">
+                                <div class="invalid-feedback" id="invalid-width"></div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label">Depth</label>
+                                <input type="number" name="depth" id="depth"
+                                       class="form-control required-listing-values"
+                                       placeholder="depth ..." onkeyup="removeValidation(this.id)">
+                                <div class="invalid-feedback" id="invalid-depth"></div>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label">Guarantee</label>
+                                <div class="input-group mb-3">
+                                    <input type="number" name="guarantee" id="guarantee"
+                                           class="form-control required-listing-values" placeholder="guarantee ..."
+                                           onkeyup="removeValidation(this.id)">
+                                    <select class="form-select-small" name="guarantee_type">
+                                        <option value="years" selected>Years</option>
+                                        <option value="months">Months</option>
+                                        <option value="weeks">Weeks</option>
+                                    </select>
+                                </div>
+                                <div class="invalid-feedback" id="invalid-guarantee"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label>Product Main Image</label>
+                                <div class="image-upload">
+                                    <input type="file" name="image" id="image">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <div class="container">
+                                    <fieldset class="form-group">
+                                        <a href="javascript:void(0)" onclick="$('.pro-image').click()"
+                                           class="btn btn-dark text-white">Upload Multiple Images</a>
+                                        <input type="file" id="pro-image" name="images[]" style="display: none;"
+                                               class="form-control pro-image" multiple>
+                                    </fieldset>
+                                    <div class="preview-images-zone">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col mt-4">
+                                <label class="form-label">Description</label>
+                                <textarea id="description" class="form-control required-listing-values"
+                                          name="description"></textarea>
+                                <div class="invalid-feedback" id="invalid-description"></div>
+                            </div>
+                        </div>
+                        <div class="row mb-3 row">
+                            <div class="col-md-3">
+                                <button class="form-control btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+@section('scripts')
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        const isValidListing = true;
+        const isGotoIndex = true;
+        const storeRoute = "{{ route('listing.store') }}";
+        const indexRoute = "{{ route('listing.index') }}";
+        let descriptionValue = '';
+        $(document).ready(function () {
+            $('#image').dropify();
+            document.getElementById('pro-image').addEventListener('change', readImage, false);
+            $(".preview-images-zone").sortable();
+            $('#test').show();
+            $('#color').select2({
+                placeholder: 'Select Color',
+            });
+            $('.material').select2({
+                placeholder: 'Select Material',
+
+            });
+            tinymce.init({
+                setup: function (editor) {
+                    editor.on('keyup', function (e) {
+                        descriptionValue = tinyMCE.activeEditor.getContent();
+                        if (!empty(descriptionValue)) {
+                            $('#invalid-description').hide();
+                            $('#description').removeClass('text-danger border-danger');
+                        }
+                    });
+                },
+                selector: '#description',
+                height: 400,
+                default_text_color: 'red',
+                plugins: [
+                    'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+                    'searchreplace wordcount visualblocks visualchars code fullscreen',
+                ],
+                toolbar1: 'undo redo | insert | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+                toolbar2: 'print preview media | forecolor backcolor emoticons | codesample help',
+                image_advtab: true,
+                templates: [{
+                    title: 'Test template 1',
+                    content: 'Test 1'
+                },
+                    {
+                        title: 'Test template 2',
+                        content: 'Test 2'
+                    }
+                ],
+                content_css: []
+            });
+        });
+        $(window).on('load', function () {
+            setTimeout(function () {
+                $('.tox-notification--warning').remove();
+            }, 1000);
+        });
+
+        function removeValidation(id) {
+            if (!empty($('#' + id).val())) {
+                $('#invalid-' + id).hide();
+                $('#' + id).removeClass('text-danger border-danger');
+            }
+        }
+
+        function validListingForm() {
+            let error = false;
+            $('.required-listing-values').each(function () {
+                const id = $(this).attr('id');
+                if (id == 'description') {
+                    if (typeof (tinyMCE.activeEditor.getContent()) !== 'undefined' && empty(tinyMCE.activeEditor.getContent())) {
+                        error = true;
+                        $('#invalid-' + id).html('This field is required.').show();
+                    }
+                } else if(id != 'sub_category_id') {
+                    if (empty($('#' + id).val())) {
+                        error = true;
+                        $('#' + id).addClass('text-danger border-danger');
+                        $('#invalid-' + id).html('This field is required.').show();
+                    }
+                }
+            });
+
+            return error;
+        }
+
+        $('body').on('change', '.product_type_id', function () {
+            let formData = {
+                '_token': "{{csrf_token()}}",
+                product_type_id: $(this).val(),
+            };
+            $.ajax({
+                url: "{{url('get/product/listing/category')}}",
+                type: "GET",
+                data: formData,
+                success: function (response) {
+                    if (response.category) {
+                        let html = '<option value="">Select Product Category</option>';
+                        if (!empty(response.category)) {
+                            $.each(response.category, function (i, v) {
+                                html += '<option value="' + v.id + '">' + v.name + '</option>';
+                            })
+                        }
+                        $('#category_id').html('').html(html);
+                    }
+                }
+            })
+        });
+        $('body').on('change', '.category_id', function () {
+            let formData = {
+                '_token': "{{csrf_token()}}",
+                category_id: $(this).val(),
+            };
+            $.ajax({
+                url: "{{url('get/product/listing/sub-category')}}",
+                type: "GET",
+                data: formData,
+                success: function (response) {
+                    let html = '<option value="">Select Sub Category</option>';
+                    if (!empty(response.subCategory)) {
+                        $.each(response.subCategory, function (i, v) {
+                            html += '<option value="' + v.id + '">' + v.name + '</option>';
+                        })
+                    }
+                    $('#sub_category_id').html('').html(html);
+                }
+            })
+        });
+        let num = 4;
+
+        function readImage() {
+            if (window.File && window.FileList && window.FileReader) {
+                let files = event.target.files; //FileList object
+                let output = $(".preview-images-zone");
+
+                for (let i = 0; i < files.length; i++) {
+                    let file = files[i];
+                    if (!file.type.match('image')) continue;
+                    let picReader = new FileReader();
+                    picReader.addEventListener('load', function (event) {
+                        let picFile = event.target;
+                        let html = '<div class="preview-image preview-show-' + num + '">' +
+                            '<div class="image-cancel" data-no="' + num + '">x</div>' +
+                            '<div class="image-zone"><img id="pro-img-' + num + '" src="' + picFile.result + '"></div>' +
+                            '</div>';
+
+                        output.append(html);
+                        num = num + 1;
+                    });
+
+                    picReader.readAsDataURL(file);
+                }
+            } else {
+                alert('Browser not support');
+            }
+        }
+
+        $(document).on('click', '.image-cancel', function () {
+            let no = $(this).data('no');
+            $(".preview-image.preview-show-" + no).remove();
+        });
+
+    </script>
+@endsection

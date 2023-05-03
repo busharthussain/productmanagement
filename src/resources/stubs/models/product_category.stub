@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use bushart\productmanagement\CrudHelpers;
+use bushart\productmanagement\Grid;
+
+class ProductCategory extends Model
+{
+
+    use HasFactory;
+
+    protected $guarded = ['id'];
+
+    /**
+     * This is use to function get product category data
+     *
+     * @param $params
+     * @return array
+     */
+    protected static function getData($params)
+    {
+        $path = asset('images/category');
+        $sql = DB::table('product_categories as pc')
+            ->select('pc.*','pt.name as product_type_name', DB::raw("CONCAT('$path','/',pc.image) as image"))
+            ->leftJoin('product_types as pt','pt.id' ,'=','pc.product_type_id');
+        if (!empty($params['sortColumn']) && !empty($params['sortType'])) {
+            $sql->orderBy($params['sortColumn'], $params['sortType']);
+        }
+        if (!empty($params['search'])) {
+            $search = '%' . $params['search'] . '%';
+            $sql->where('pc.name', 'like', $search);
+        }
+        $sql->orderBy('pc.created_at', 'desc');
+        $grid = [];
+        $grid['query'] = $sql;
+        $grid['perPage'] = $params['perPage'];
+        $grid['page'] = $params['page'];
+        $grid['gridFields'] = self::gridFields();
+
+        return Grid::runSql($grid);
+    }
+
+    /**
+     * this is use to function make grid file
+     *
+     * @return array
+     */
+    protected static function gridFields()
+    {
+        $fields = [
+           ['name'], ['product_type_name'],['image']
+        ];
+        $arrFields = CrudHelpers::generateGridHeaders($fields);
+
+        return $arrFields;
+    }
+
+    /**
+     * This is used to get data from sub categories
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function subCategories()
+    {
+        return $this->hasMany(ProductSubCategory::class, 'category_id', 'id');
+    }
+}

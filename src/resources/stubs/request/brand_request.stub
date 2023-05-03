@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class BrandRequest extends FormRequest
+{
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'name' => 'required',
+            'image' => 'required',
+            'description' => 'required',
+        ];
+    }
+
+    /**
+     * this is use to function brand table backend validation show message
+     *
+     */
+    public function messages()
+    {
+        return [
+            'name.required' => 'Please enter the brand name',
+            'image.required' => 'Please Select the brand Image',
+            'description.required' => 'Please enter the brand description',
+        ];
+    }
+
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        $record = [];
+        parse_str($this->data, $record);
+        $this->request->add($record);
+
+        return true;
+    }
+}

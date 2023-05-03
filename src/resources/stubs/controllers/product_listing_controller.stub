@@ -1,0 +1,342 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Brand;
+use App\Models\Color;
+use App\Models\Material;
+use App\Models\ProductType;
+use App\Models\Style;
+use bushart\productmanagement\CrudHelpers;
+use App\Models\ProductCategory;
+use App\Models\ProductListing;
+use App\Models\ProductSubCategory;
+use App\Models\ProductAttachment;
+use App\Requests\ProductListingRequest;
+
+class ProductListingController extends Controller
+{
+    private $data, $params = [];
+    private $success = false;
+    private $message = '';
+
+    /**
+     * Display a listing of the resource.
+     * @return Renderable
+     */
+    public function index()
+    {
+        $this->data['headers'] = $this->headers();
+
+        return view('admin.product-listing.index', $this->data);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     * @return Renderable
+     */
+    public function create()
+    {
+        $this->data['color'] = Color::get()->toArray();
+        $this->data['style'] = Style::get()->toArray();
+        $this->data['material'] = Material::get()->toArray();
+        $this->data['brand'] = Brand::get()->toArray();
+        $this->data['productType'] = ProductType::get()->toArray();
+
+        return view('admin.product-listing.create', $this->data);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param ProductListingRequest $request
+     * @return Renderable
+     */
+    public function store(ProductListingRequest $request)
+    {
+        $data = $request->all();
+        if (!empty($data)) {
+            $color = $data['color'];
+            $material = $data['material'];
+            $images = !empty($data['images']) ? $data['images'] : [];
+            unset($data['_token'], $data['images'], $data['color'], $data['material']);
+            $data['image'] = CrudHelpers::uploadImage($request, 'image', 'images/listing');
+            $data['user_id'] = Auth::user()->id;
+            $listing = ProductListing::create($data);
+            $arrColor = CrudHelpers::getArrayAttachment($color, $listing['id'], 'color_id');
+            $arrMaterial = CrudHelpers::getArrayAttachment($material, $listing['id'], 'material_id');
+            $arrImage = CrudHelpers::getArrayAttachment($images, $listing['id'], 'image');
+            $arrayAttachments = array_merge($arrColor, $arrMaterial, $arrImage);
+            if (!empty($arrayAttachments)) {
+                ProductAttachment::insert($arrayAttachments);
+            }
+            $this->success = true;
+            $this->message = 'Product Listing created successfully';
+        }
+
+        return response()->json(['success' => $this->success, 'message' => $this->message, 'data' => $this->data]);
+    }
+
+    /**x
+     * Show the specified resource.
+     * @param int $id
+     * @return Renderable
+     */
+    public function show($id)
+    {
+        return view('admin.product-listing.show');
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     * @param int $id
+     * @return Renderable
+     */
+    public function edit($id)
+    {
+        $listing = ProductListing::find($id);
+        $colorId = ProductAttachment::select('color_id')->whereNotNull('color_id')->where('listing_id', $listing->id)->get()->toArray();
+        $this->data['colorIds'] = array_column($colorId, 'color_id');
+        $materialId = ProductAttachment::select('material_id')->whereNotNull('material_id')->where('listing_id', $listing->id)->get()->toArray();
+        $this->data['materialIds'] = array_column($materialId, 'material_id');
+        $this->data['color'] = Color::get()->toArray();
+        $this->data['material'] = Material::get()->toArray();
+        $this->data['style'] = Style::get()->toArray();
+        $this->data['productType'] = ProductType::get()->toArray();
+        $this->data['brand'] = Brand::get()->toArray();
+        $this->data['images'] = ProductAttachment::whereNotNull('image')->where('listing_id', $listing->id)->get()->toArray();
+//        $this->data['images'] = array_column($images, 'image');
+        $this->data['data'] = $listing;
+
+
+        return view('admin.product-listing.edit', $this->data);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     * @param Request $request
+     * @return Renderable
+     */
+    public function update(Request $request)
+    {
+        $attachments = [];
+        $data = $request->all();
+        $attachments['color'] = $data['color'];
+        $attachments['material'] = $data['material'];
+        $attachments['images'] = !empty($data['images']) ? $data['images'] : [];
+        $productListing = ProductListing::find($data['id']);
+        if (!empty($productListing)) {
+            if ($request->hasFile('image')) {
+                $data['image'] = CrudHelpers::uploadImage($request, 'image', 'images/listing', $productListing->image);
+            }
+            $arrColor = $arrMaterial = $arrImage = [];
+            if (!empty($attachments)) {
+                if (!empty($attachments['color'])){
+                    $type = 'color';
+                    $arrColor = $this->prepareData($attachments['color'],$type, $productListing);
+                }
+                if (!empty($attachments['material'])){
+                    $type = 'material';
+                    $arrMaterial = $this->prepareData($attachments['material'],$type, $productListing);
+                }
+                $imageCount = 1;
+                $arrImage = ProductAttachment::select('listing_id', 'color_id', 'material_id', 'image', 'image_original_name')->where('listing_id', $data['id'])->whereNotNull('image')->get()->toArray();
+                if (!empty($arrImage) && count($arrImage) > 0) {
+                    $imageCount = count($arrImage);
+                }
+                foreach ($attachments['images'] as $key => $row) {
+                    $imageDetail = CrudHelpers::uploadMultipleImages($row, 'images/multiple-product-image');
+                    $arrImage[$imageCount]['listing_id'] = $productListing->id;
+                    $arrImage[$imageCount]['color_id'] = null;
+                    $arrImage[$imageCount]['material_id'] = null;
+                    $arrImage[$imageCount]['image'] = $imageDetail['file_name'];
+                    $arrImage[$imageCount]['image_original_name'] = $imageDetail['original_name'];
+                    $imageCount++;
+                }
+                $arrayAttachments = array_merge($arrColor, $arrMaterial, $arrImage);
+                ProductAttachment::where('listing_id', $data['id'])->delete();
+                if (!empty($arrayAttachments)) {
+                    ProductAttachment::insert($arrayAttachments);
+                }
+            }
+            $data['user_id'] = Auth::user()->id;
+            $data['description'] = !empty($data['description']) ? $data['description'] : $productListing->description;
+            $productListing->update($data);
+            $this->success = true;
+            $this->message = 'Product Listing updated successfully';
+        }
+
+        return response()->json(['success' => $this->success, 'message' => $this->message, 'data' => $this->data]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     * @param int $id
+     * @return Renderable
+     */
+    public function destroy($id)
+    {
+        $obj = ProductListing::find($id);
+        if ($obj) {
+            $attachment = ProductAttachment::where('listing_id', $id)->get()->toArray();
+            ProductAttachment::where('listing_id', $id)->delete();
+            CrudHelpers::removeImagesFromStorage($attachment, 'images/multiple-product-image');
+            $previousImagePath = public_path('images/listing') . $obj->image;
+            if (file_exists($previousImagePath)) {
+                unlink($previousImagePath);
+            }
+            $obj->delete();
+            $this->success = true;
+            $this->message = 'Product Listing deleted successfully';
+        }
+
+        return response()->json(['success' => $this->success, 'message' => $this->message]);
+    }
+
+    /**
+     * this is used to show product listing data
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getData(Request $request)
+    {
+        $this->data = [];
+        $this->params = [
+            'perPage' => 25,
+            'page' => $request->input('page'),
+            'search' => $request->input('search'),
+            'sortColumn' => $request->input('sortColumn'),
+            'sortType' => $request->input('sortType'),
+            'dropDownFilters' => $request->input('dropDownFilters'),
+        ];
+        $this->data = ProductListing::getData($this->params);
+        foreach ($this->data['result'] as $key => $row) {
+            if (!empty($row->id)) {
+                $colorIds = ProductAttachment::select('color_id')->whereNotNull('color_id')->where('listing_id', $row->id)->get()->toArray();
+                $color = Color::select('name')->whereIn('id', $colorIds)->get()->toArray();
+                $colorArray = array_column($color, 'name');
+                $arrColor = implode(',', $colorArray);
+                $materialIds = ProductAttachment::select('material_id')->whereNotNull('material_id')->where('listing_id', $row->id)->get()->toArray();
+                $marerial = Material::select('name')->whereIn('id', $materialIds)->get()->toArray();
+                $materialArray = array_column($marerial, 'name');
+                $arrMaterial = implode(',', $materialArray);
+                $row->color_name = $arrColor;
+                $row->material_name = $arrMaterial;
+            }
+        }
+
+        return response()->json($this->data);
+    }
+
+    /**
+     *
+     * this use to function get category id
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getProductCategory(Request $request)
+    {
+        $data = $request->all();
+        $category = ProductCategory::where('product_type_id', $data['product_type_id'])->get()->toArray();
+
+        return response()->json(['category' => $category]);
+    }
+
+    /**
+     *
+     * this use to function get sub category id
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getProductSubCategory(Request $request)
+    {
+        $data = $request->all();
+        $subCategory = ProductSubCategory::select('name', 'id')->where('category_id', $data['category_id'])->get()->toArray();
+
+        return response()->json(['subCategory' => $subCategory]);
+    }
+
+    /**
+     * this use to function delete images
+     *
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function imageDestroy($id)
+    {
+        $obj = ProductAttachment::find($id);
+        $obj->delete();
+        $this->success = true;
+        $this->message = 'Product Listing Image deleted successfully';
+
+        return response()->json(['success' => $this->success, 'message' => $this->message]);
+    }
+
+    /**
+     *
+     * this use to function get ProductImagesAttachments images
+     *
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getImageValue($id)
+    {
+        $data = ProductAttachment::select('image')->whereNotNull('image')->where('listing_id', $id)->get()->toArray();
+        $images = array_column($data, 'image');
+
+        return response()->json(['data' => $images]);
+    }
+
+    /**
+     * this is use to function create table header name
+     *
+     * @return array
+     */
+    protected function headers()
+    {
+        $array = [
+            ['product type'], ['product category'], ['product sub category'], ['product'],
+            ['brand'], ['material'], ['style'],
+            ['quantity'], ['color'], ['height'], ['width'], ['depth'], ['price'], ['discount'], ['description'],
+            ['guarantee'], ['guarantee type'], ['image'], ['actions', '', false]
+        ];
+
+        return CrudHelpers::generateHeaders($array);
+    }
+
+     /**
+         * this is use to prepare array
+         *
+         * @param $data
+         * @param $type
+         * @param $productListing
+         * @return array
+         */
+        protected function prepareData($data,$type,$productListing)
+        {
+            $arr = [];
+            foreach ($data as $key => $row) {
+                $arr[$key]['listing_id'] = $productListing->id;
+                if ($type == 'color') {
+                    $arr[$key]['color_id'] = $row;
+                    $arr[$key]['material_id'] = null;
+                    $arr[$key]['image'] = null;
+                    $arr[$key]['image_original_name'] = null;
+                } else {
+                    $arr[$key]['color_id'] = null;
+                    $arr[$key]['material_id'] = $row;
+                    $arr[$key]['image'] = null;
+                    $arr[$key]['image_original_name'] = null;
+                }
+            }
+
+            return $arr;
+        }
+}

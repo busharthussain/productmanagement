@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<!-- Mirrored from dreamspos.dreamguystech.com/html/template/productlist.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 25 Feb 2023 07:37:30 GMT -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <meta name="description" content="POS - Bootstrap Admin Template">
+    <meta name="keywords"
+          content="admin, estimates, bootstrap, business, corporate, creative, invoice, html5, responsive, Projects">
+    <meta name="author" content="Dreamguys - Bootstrap Admin Template">
+    <meta name="robots" content="noindex, nofollow">
+    <title>@yield('title')</title>
+    <link rel="shortcut icon" type="image/x-icon"
+          href="{{ asset('assets/images/versay_living.JPG') }}">
+    <!-- plugin css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"/>
+    <link href="{{asset('assets/admin-css/plugins/perfect-scrollbar/perfect-scrollbar.css')}}" rel="stylesheet"/>
+    <link href="{{asset('assets/admin-css/css/bootstrap.min.css')}}" rel="stylesheet"/>
+    <link href="{{asset('assets/admin-css/css/app.css')}}" rel="stylesheet"/>
+    <link href="{{asset('assets/admin-css/plugins/dropify/css/dropify.min.css')}}" rel="stylesheet"/>
+    <link href="{{asset('assets/admin-css/plugins/flag-icon-css/css/flag-icon.min.css')}}" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css"/>
+    <link rel="stylesheet" href="{{ asset('assets/admin-css/plugins/select2/select2.min.css') }}">
+    <link href="{{asset('assets/admin-css/css/animate.css')}}" rel="stylesheet"/>
+</head>
+<body>
+<div id="global-loader">
+    <div class="whirly-loader"></div>
+</div>
+<div class="main-wrapper">
+    @include('admin.layout.partials._sidebar')
+
+    @include('admin.layout.partials._navbar')
+    <div class="page-wrapper">
+        <div class="content">
+            <div class="container mt-7">
+                @yield('content')
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{ asset('assets/admin-js/js/app.js') }}"></script>
+<script src="{{ asset('js/magic.js') }}"></script>
+<script src="{{ asset('assets/admin-css/plugins/dropify/js/dropify.min.js') }}"></script>
+<script src="{{ asset('assets/admin-css/plugins/select2/select2.min.js') }}"></script>
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js"></script>
+<script src="{{ asset('assets/admin-js/js/template.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="{{ asset('assets/admin-js/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://dreamspos.dreamguystech.com/html/template/assets/js/feather.min.js"></script>
+<script src="https://dreamspos.dreamguystech.com/html/template/assets/js/jquery.slimscroll.min.js"></script>
+<script src="https://dreamspos.dreamguystech.com/html/template/assets/plugins/select2/js/select2.min.js"></script>
+@yield('scripts')
+</body>
+
+<!-- Mirrored from dreamspos.dreamguystech.com/html/template/productlist.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 25 Feb 2023 07:37:30 GMT -->
+</html>

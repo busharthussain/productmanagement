@@ -1,0 +1,67 @@
+@extends('admin.layout.index')
+@section('title','Product category')
+@section('content')
+    <div class="page-header">
+        <div class="page-title">
+            <h4>Sub Category List</h4>
+            <h6>Manage your Sub Categories</h6>
+        </div>
+        <div class="page-btn">
+            <a href="{{ route('sub.category.create') }}" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-square-plus"></i> Create New
+            </a>
+        </div>
+    </div>
+    <div class="card card-custom">
+
+        <div class="card-body">
+            <div class="col-sm-3 mb-3">
+                <input class="form-control" type="search" id="search" placeholder="Search Name">
+            </div>
+            <div class="table-responsive">
+                <table class="table text-left">
+                    @include('partials._create_header', ['headers' => $headers])
+                    <tbody id="page-data">
+                    </tbody>
+                </table>
+                <div class="paq-pager"></div>
+            </div>
+        </div>
+    </div>
+@endsection
+@section('scripts')
+    <script>
+        const renderRoute = "{{ route('sub.category.data')}}";
+        let editRoute = "{{ route('sub.category.edit', ['category' => 0])}}";
+        editRoute = editRoute.substr(0, editRoute.lastIndexOf("/"));
+        editRoute = editRoute.substr(0, editRoute.lastIndexOf("/"));
+        const deleteRoute = '{{ route('sub.category.delete') }}';
+        const token = "{{ csrf_token() }}";
+        let defaultType = 'renderAction';
+        let page = 1;
+        let id = '';
+        let search = '';
+        const asc = 'up';
+        const desc = 'down';
+        let sortType = 'desc';
+        let sortColumn = 'id';
+        let dropDownFilters = {};
+        let formData = {};
+        $(document).ready(function () {
+            functionType = defaultType;
+            updateFormData();
+            renderMagic();
+        });
+
+        function updateFormData() {
+            formData = {
+                '_token': token,
+                page: page,
+                search: search,
+                sortType: sortType,
+                sortColumn: sortColumn
+            };
+        }
+    </script>
+@endsection
+

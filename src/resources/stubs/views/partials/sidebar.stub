@@ -1,0 +1,103 @@
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-inner slimscroll">
+        <div id="sidebar-menu" class="sidebar-menu">
+            <ul>
+                <li>
+                    <a href="{{ url('dashboard') }}" class="@if(url()->current() == url('dashboard')) active @endif"><i
+                                class="fa-solid fa-boxes-stacked"></i><span> Dashboard</span>
+                    </a>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><i class="fa-solid fa-box"></i><span> Product</span> <span
+                                class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{route('product-type.create')}}"
+                               class="@if(request()->url('product-type/create') == url('product-type/create')) active  @endif">Add
+                                Product Type</a></li>
+                        <li>
+                            <a href="{{route('product-type.index')}}"
+                               class="@if(request()->url('listing') == url('listing')) active @endif">Product Type
+                                List</a>
+                        </li>
+                        <li><a href="{{route('category.create')}}"
+                               class="nav-item @if(request()->url('category/create') == url('category/create')) active @endif">Add
+                                Category</a>
+                        </li>
+                        <li><a href="{{route('category.index')}}"
+                               class="nav-item @if(request()->url('category') == url('category')) active @endif">Category
+                                List</a>
+                        </li>
+                        <li><a href="{{route('sub.category.create')}}"
+                               class="nav-item @if(request()->url('sub-category/create') == url('sub-category/create')) active @endif">Add
+                                Sub Category</a>
+                        </li>
+                        <li><a href="{{route('sub.category.index')}}"
+                               class="nav-item @if(request()->url('sub-category/product') == url('sub-category/product')) active @endif">Sub
+                                Category List</a>
+                        </li>
+                        <li><a href="{{route('listing.create')}}"
+                               class="@if(request()->url('listing/create') == url('listing/create')) active  @endif">Add
+                                Product</a></li>
+                        <li>
+                            <a href="{{route('listing.index')}}"
+                               class="@if(request()->url('listing') == url('listing')) active @endif">Product
+                                List</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><i class="fa-solid fa-box"></i><span> Material</span> <span
+                                class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{route('material.create')}}"
+                               class="@if(request()->url('material/create') == url('material/create')) active @endif">Add
+                                Material</a></li>
+                        <li><a href="{{route('material.index')}}"
+                               class="nav-item @if(request()->url('material') == url('material')) active @endif">Material
+                                List</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><i class="fa-brands fa-phabricator"></i><span> Brand</span> <span
+                                class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{route('brand.create')}}"
+                               class="@if(request()->url('brand/create') == url('brand/create')) active @endif">Add
+                                Brand</a></li>
+                        <li><a href="{{route('brand.index')}}"
+                               class="nav-item @if(request()->url('brand') == url('brand')) active @endif">Brand
+                                List</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><i class="fa-solid fa-vest-patches"></i><span> Style</span> <span
+                                class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{route('style.create')}}"
+                               class="@if(request()->url('style/create') == url('style/create')) active @endif">Add
+                                Style</a></li>
+                        <li><a href="{{route('style.index')}}"
+                               class="nav-item @if(request()->url('style') == url('style')) active @endif">Style
+                                List</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"> <i class="fa-sharp fa-solid fa-palette"></i><span> Color</span> <span
+                                class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{route('color.create')}}"
+                               class="@if(request()->url('color/create') == url('color/create')) active @endif">Add
+                                Color</a></li>
+                        <li><a href="{{route('color.index')}}"
+                               class="nav-item @if(request()->url('color') == url('color')) active @endif">Color
+                                List</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

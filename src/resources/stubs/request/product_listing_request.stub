@@ -1,0 +1,75 @@
+<?php
+
+namespace App\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class ProductListingRequest extends FormRequest
+{
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'brand_id' => 'required',
+            'category_id' => 'required',
+            'product_type_id' => 'required',
+            'color' => 'required',
+            'style_id' => 'required',
+            'image' => 'required',
+            'name' => 'required',
+            'material' => 'required',
+            'quantity' => 'required',
+            'height' => 'required',
+            'width' => 'required',
+            'depth' => 'required',
+            'price' => 'required',
+            'discount' => 'required',
+            'description' => 'required',
+            'guarantee' => 'required',
+        ];
+    }
+
+    /**
+     * this is use to function product listing backend validation show message
+     *
+     */
+    public function messages()
+    {
+        return [
+            'brand_id.required' => 'Please select the brand',
+            'category_id.required' => 'Please select the category',
+            'product_type_id.required' => 'Please select the product type',
+            'color.required' => 'Please select the color',
+            'material.required' => 'Please select the material',
+            'image.required' => 'Please select the image',
+            'style_id.required' => 'Please select the style',
+            'name.required' => 'Please enter the name',
+            'quantity.required' => 'Please enter the quantity',
+            'height.required' => 'Please enter the height',
+            'width.required' => 'Please enter the width',
+            'depth.required' => 'Please enter the depth',
+            'price.required' => 'Please enter the price',
+            'discount.required' => 'Please enter the discount',
+            'description.required' => 'Please enter the description',
+            'guarantee.required' => 'Please enter the guarantee',
+        ];
+    }
+
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        $record = [];
+        parse_str($this->data, $record);
+        $this->request->add($record);
+
+        return true;
+    }
+}

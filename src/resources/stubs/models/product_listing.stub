@@ -1,0 +1,87 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Session;
+use bushart\productmanagement\CrudHelpers;
+use bushart\productmanagement\Grid;
+
+class ProductListing extends Model
+{
+    use HasFactory;
+
+    protected $guarded = ['id'];
+
+    /**
+     * This is use to function get product category data
+     *
+     * @param $params
+     * @return array
+     */
+    protected static function getData($params)
+    {
+        $path = asset('images/listing');
+        $sql = DB::table('product_listings as pl')
+            ->select('pl.*', 'pc.name as category_name', 'psc.name as sub_category_name',
+                's.name as style_name', 'b.name as brand_name', 'pl.color_id as color_name', 'pt.name as product_type_name', 'pl.material_id as material_name', DB::raw("CONCAT('$path','/',pl.image) as image"))
+            ->leftJoin('product_categories as pc', 'pc.id', '=', 'pl.category_id')
+            ->leftJoin('product_sub_categories as psc', 'psc.id', '=', 'pl.sub_category_id')
+            ->join('brands as b', 'b.id', '=', 'pl.brand_id')
+            ->join('styles as s', 's.id', '=', 'pl.style_id')
+            ->join('product_types as pt', 'pt.id', '=', 'pl.product_type_id');
+        if (!empty($params['sortColumn']) && !empty($params['sortType'])) {
+            $sql->orderBy($params['sortColumn'], $params['sortType']);
+        }
+        if (!empty($params['search'])) {
+            $search = '%' . $params['search'] . '%';
+            $sql->where('pl.name', 'like', $search);
+        }
+        $sql->orderBy('pl.created_at', 'desc');
+        $grid = [];
+        $grid['query'] = $sql;
+        $grid['perPage'] = $params['perPage'];
+        $grid['page'] = $params['page'];
+        $grid['gridFields'] = self::gridFields();
+        return Grid::runSql($grid);
+    }
+
+    /**
+     * this is use to function make grid file
+     *
+     * @return array
+     */
+    protected static function gridFields()
+    {
+        $fields = [
+            ['product_type_name'], ['category_name'], ['sub_category_name'], ['name'], ['brand_name'], ['material_name'], ['style_name'],
+            ['quantity'], ['color_name'], ['height'], ['width'], ['depth'], ['price'], ['discount'],
+            ['description'], ['guarantee'], ['guarantee_type'], ['image']
+        ];
+        $arrFields = CrudHelpers::generateGridHeaders($fields);
+
+        return $arrFields;
+    }
+
+    /**
+     * This is used to get data from brands
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function brands()
+    {
+        return $this->belongsTo(Brand::class, 'brand_id', 'id');
+    }
+
+    /**
+     * This is used to get data from material
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function material()
+    {
+        return $this->belongsTo(Material::class, 'material_id', 'id');
+    }
+}

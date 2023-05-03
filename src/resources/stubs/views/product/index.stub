@@ -1,0 +1,67 @@
+@extends('admin.layout.index')
+@section('title','Product')
+@section('content')
+    <div class="card card-custom">
+        <div class="card-header flex-wrap py-5">
+            <div class="card-title">
+                <h3 class="card-label">Product</h3>
+            </div>
+            <div class="card-toolbarb row">
+                <div class="col-sm-6">
+                    <input class="form-control" type="search" id="search" placeholder="Search Name">
+                </div>
+                <div class="col-sm-6">
+                    <a href="{{route('product.create')}}" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-square-plus"></i> Create New
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table text-left">
+                    @include('partials._create_header', ['headers' => $headers])
+                    <tbody id="page-data"></tbody>
+                </table>
+                <div class="paq-pager"></div>
+            </div>
+        </div>
+    </div>
+@endsection
+@section('scripts')
+    <script>
+        const renderRoute = "{{ route('products.data') }}";
+        let editRoute = '{{ URL::route('product.edit', ['product' => 0])}}';
+        editRoute = editRoute.substr(0, editRoute.lastIndexOf("/"));
+        editRoute = editRoute.substr(0, editRoute.lastIndexOf("/"));
+        let showDataRoute = '{{ url('product')}}';
+        const deleteRoute = '{{url('product')}}';
+        const token = "{{ csrf_token() }}";
+        let defaultType = 'renderAction';
+        let page = 1;
+        let id = '';
+        let search = '';
+        const asc = 'up';
+        const desc = 'down';
+        let sortType = 'desc';
+        let sortColumn = 'id';
+        let dropDownFilters = {};
+        let formData = {};
+        $(document).ready(function () {
+            functionType = defaultType;
+            updateFormData();
+            renderMagic();
+        });
+
+        function updateFormData() {
+            formData = {
+                '_token': token,
+                page: page,
+                search: search,
+                sortType: sortType,
+                sortColumn: sortColumn
+            };
+        }
+    </script>
+@endsection
+

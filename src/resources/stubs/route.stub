@@ -1,0 +1,54 @@
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard.index');
+    });
+
+    Route::resource('category', 'App\Http\Controllers\ProductCategoryController');
+    Route::post('category/update', [App\Http\Controllers\ProductCategoryController::class, 'update'])->name('category.update');
+    Route::post('category/data', [App\Http\Controllers\ProductCategoryController::class, 'getData'])->name('category.data');
+    Route::resource('listing', 'App\Http\Controllers\ProductListingController');
+    Route::post('listing/update', [App\Http\Controllers\ProductListingController::class, 'update'])->name('listing.update');
+    Route::post('listing/data', [App\Http\Controllers\ProductListingController::class, 'getData'])->name('listing.data');
+    Route::get('get/product/listing/category', [App\Http\Controllers\ProductListingController::class, 'getProductCategory']);
+    Route::get('get/product/listing/sub-category', [App\Http\Controllers\ProductListingController::class, 'getProductSubCategory']);
+    Route::delete('image/delete/{id?}', [App\Http\Controllers\ProductListingController::class, 'imageDestroy']);
+    Route::get('image/value/{id?}', [App\Http\Controllers\ProductListingController::class, 'getImageValue']);
+
+    Route::group(['prefix' => 'sub-category'], function () {
+        Route::get('create', [App\Http\Controllers\ProductSubCategoryController::class, 'create'])->name('sub.category.create');
+        Route::get('product', [App\Http\Controllers\ProductSubCategoryController::class, 'index'])->name('sub.category.index');
+        Route::post('store', [App\Http\Controllers\ProductSubCategoryController::class, 'store'])->name('sub.category.store');
+        Route::get('{id?}/edit', [App\Http\Controllers\ProductSubCategoryController::class, 'edit'])->name('sub.category.edit');
+        Route::post('update', [App\Http\Controllers\ProductSubCategoryController::class, 'update'])->name('sub.category.update');
+        Route::delete('{id?}', [App\Http\Controllers\ProductSubCategoryController::class, 'destroy'])->name('sub.category.delete');
+        Route::post('data', [App\Http\Controllers\ProductSubCategoryController::class, 'getData'])->name('sub.category.data');
+        Route::get('get/product/category', [App\Http\Controllers\ProductSubCategoryController::class, 'getProductCategory'])->name('product-type.category');
+    });
+
+    Route::group(['prefix' => 'product-type'], function () {
+        Route::get('create', [App\Http\Controllers\ProductTypeController::class, 'create'])->name('product-type.create');
+        Route::get('listing', [App\Http\Controllers\ProductTypeController::class, 'index'])->name('product-type.index');
+        Route::post('store', [App\Http\Controllers\ProductTypeController::class, 'store'])->name('product-type.store');
+        Route::get('{id?}/edit', [App\Http\Controllers\ProductTypeController::class, 'edit'])->name('product-type.edit');
+        Route::post('update', [App\Http\Controllers\ProductTypeController::class, 'update'])->name('product-type.update');
+        Route::delete('{id?}', [App\Http\Controllers\ProductTypeController::class, 'destroy'])->name('product-type.delete');
+        Route::post('data', [App\Http\Controllers\ProductTypeController::class, 'getData'])->name('product-type.data');
+    });
+
+    Route::resource('brand', 'App\Http\Controllers\BrandController');
+    Route::post('brand/get/data', [App\Http\Controllers\BrandController::class, 'getData'])->name('brand.data');
+    Route::post('brand/update', [App\Http\Controllers\BrandController::class, 'update'])->name('brand.update');
+
+    Route::resource('material', 'App\Http\Controllers\MaterialController');
+    Route::post('material/update', [App\Http\Controllers\MaterialController::class, 'update'])->name('material.update');
+    Route::post('material/get/data', [App\Http\Controllers\MaterialController::class, 'getData'])->name('material.data');
+
+    Route::resource('style', 'App\Http\Controllers\StyleController');
+    Route::post('style/update', [App\Http\Controllers\StyleController::class, 'update'])->name('style.update');
+    Route::post('style/get/data', [App\Http\Controllers\StyleController::class, 'getData'])->name('style.data');
+
+    Route::resource('color', 'App\Http\Controllers\ColorController');
+    Route::post('color/update', [App\Http\Controllers\ColorController::class, 'update'])->name('color.update');
+    Route::post('color/data', [App\Http\Controllers\ColorController::class, 'getData'])->name('color.data');
+
+});
